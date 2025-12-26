@@ -1,0 +1,307 @@
+CMOS Inverter
+module inv (vin, vout);
+  input vin;
+  output vout;
+  supply0 gnd;
+  supply1 pwr;
+
+  pmos p1 (vout, pwr, vin);
+  nmos n1 (vout, gnd, vin);
+endmodule
+
+// Testbench
+module inv_test;
+  wire vout;
+  reg vin;
+  inv i1 (vin, vout);
+
+  initial begin
+    vin = 1'b0; #10;
+    vin = 1'b1; #10;
+  end
+endmodule
+
+
+
+🔹 NAND Gate
+module nand_gate (vin1, vin2, vout);
+  input vin1, vin2;
+  output vout;
+  supply0 gnd;
+  supply1 pwr;
+  wire contact;
+
+  pmos p1 (vout, pwr, vin1);
+  pmos p2 (vout, pwr, vin2);
+  nmos n1 (vout, contact, vin1);
+  nmos n2 (contact, gnd, vin2);
+endmodule
+
+// Testbench
+module nand_test;
+  reg vin1, vin2;
+  wire vout;
+  nand_gate n1 (vin1, vin2, vout);
+
+  initial begin
+    vin1 = 1'b0; vin2 = 1'b0; #10;
+    vin1 = 1'b0; vin2 = 1'b1; #10;
+    vin1 = 1'b1; vin2 = 1'b0; #10;
+    vin1 = 1'b1; vin2 = 1'b1; #10;
+  end
+endmodule
+
+
+
+🔹 NOR Gate
+module nor_gate (vin1, vin2, vout);
+  input vin1, vin2;
+  output vout;
+  supply0 gnd;
+  supply1 pwr;
+  wire contact;
+
+  pmos p1 (vout, pwr, vin1);
+  pmos p2 (vout, pwr, vin2);
+  nmos n1 (vout, gnd, vin1);
+  nmos n2 (vout, gnd, vin2);
+endmodule
+
+// Testbench
+module nor_test;
+  reg vin1, vin2;
+  wire vout;
+  nor_gate n1 (vin1, vin2, vout);
+
+  initial begin
+    vin1 = 1'b0; vin2 = 1'b0; #10;
+    vin1 = 1'b0; vin2 = 1'b1; #10;
+    vin1 = 1'b1; vin2 = 1'b0; #10;
+    vin1 = 1'b1; vin2 = 1'b1; #10;
+  end
+endmodule
+
+
+
+🔹 XOR Gate
+module xor_gate (vin1, vin2, vout);
+  input vin1, vin2;
+  output vout;
+  supply0 gnd;
+  supply1 pwr;
+  wire c1, c2, c3;
+
+  pmos p1 (c1, pwr, vin1);
+  pmos p2 (c1, pwr, vin2);
+  pmos p3 (vout, c1, vin1);
+  pmos p4 (vout, c1, vin2);
+
+  nmos n1 (c2, gnd, vin1);
+  nmos n2 (c2, gnd, vin2);
+  nmos n3 (c3, gnd, vin1);
+  nmos n4 (c3, gnd, vin2);
+endmodule
+
+// Testbench
+module xor_test;
+  reg vin1, vin2;
+  wire vout;
+  xor_gate x1 (vin1, vin2, vout);
+
+  initial begin
+    vin1 = 1'b0; vin2 = 1'b0; #10;
+    vin1 = 1'b0; vin2 = 1'b1; #10;
+    vin1 = 1'b1; vin2 = 1'b0; #10;
+    vin1 = 1'b1; vin2 = 1'b1; #10;
+  end
+endmodule
+
+
+
+🔹 D Flip-Flop
+module dff (clk, d, q);
+  input clk, d;
+  output reg q;
+
+  always @(posedge clk) begin
+    q <= d;
+  end
+endmodule
+
+// Testbench
+module dff_test;
+  reg clk, d;
+  wire q;
+  dff d1 (clk, d, q);
+
+  always #10 clk = ~clk;
+
+  initial begin
+    clk = 0;
+    d = 1'b0; #10;
+    d = 1'b1; #10;
+    d = 1'b0; #10;
+    d = 1'b1; #10;
+    $finish;
+  end
+endmodule
+
+
+
+🔹 T Flip-Flop
+module tff (clk, t, q);
+  input clk, t;
+  output reg q;
+
+  always @(posedge clk) begin
+    if (t)
+      q <= ~q;
+    else
+      q <= q;
+  end
+endmodule
+
+// Testbench
+module tff_test;
+  reg clk, t;
+  wire q;
+  tff t1 (clk, t, q);
+
+  always #10 clk = ~clk;
+
+  initial begin
+    clk = 0;
+    t = 1'b0; #10;
+    t = 1'b1; #10;
+    t = 1'b0; #10;
+    t = 1'b1; #10;
+    $finish;
+  end
+endmodule
+
+
+
+🔹 4-bit Parallel Adder
+module fulladd (a, b, cin, sum, cout);
+  input a, b, cin;
+  output sum, cout;
+
+  assign sum  = a ^ b ^ cin;
+  assign cout = (a & b) | (b & cin) | (a & cin);
+endmodule
+
+module parallel_adder (x, y, cin, sum, cout);
+  input [3:0] x, y;
+  input cin;
+  output [3:0] sum;
+  output cout;
+  wire c1, c2, c3;
+
+  fulladd fa0 (x[0], y[0], cin, sum[0], c1);
+  fulladd fa1 (x[1], y[1], c1,  sum[1], c2);
+  fulladd fa2 (x[2], y[2], c2,  sum[2], c3);
+  fulladd fa3 (x[3], y[3], c3,  sum[3], cout);
+endmodule
+
+// Testbench
+module adder_test;
+  reg [3:0] x, y;
+  reg cin;
+  wire [3:0] sum;
+  wire cout;
+
+  parallel_adder dut (x, y, cin, sum, cout);
+
+  initial begin
+    x = 4'b0000; y = 4'b0101; cin = 1'b0; #10;
+    x = 4'b1010; y = 4'b1101; cin = 1'b0; #10;
+    $finish;
+  end
+endmodule
+
+
+
+🔹 4-bit Synchronous Counter
+module counter (clk, reset, count);
+  input clk, reset;
+  output reg [3:0] count;
+
+  always @(posedge clk) begin
+    if (reset)
+      count <= 4'b0000;
+    else
+      count <= count + 1;
+  end
+endmodule
+
+// Testbench
+module counter_test;
+  reg clk, reset;
+  wire [3:0] count;
+  counter c1 (clk, reset, count);
+
+  always #5 clk = ~clk;
+
+  initial begin
+    clk = 0; reset = 1; #15;
+    reset = 0; #50;
+    $finish;
+  end
+endmodule
+
+
+
+Common Constraints from Your Lab
+Inverter
+set_input_delay -max 0.8 [get_ports "A"]
+set_output_delay -max 0.8 [get_ports "Y"]
+
+
+
+NAND Gate
+set_input_delay -max 0.8 [get_ports "A"]
+set_input_delay -max 0.8 [get_ports "B"]
+set_output_delay -max 0.8 [get_ports "Y"]
+
+
+
+NOR Gate
+set_input_delay -max 0.8 [get_ports "A"]
+set_input_delay -max 0.8 [get_ports "B"]
+set_output_delay -max 0.8 [get_ports "Y"]
+
+
+
+D Flip-Flop
+set_input_delay -max 0.8 [get_ports "D"]
+set_input_delay -max 0.8 [get_ports "clk"]
+set_output_delay -max 0.8 [get_ports "Q"]
+
+
+
+T Flip-Flop
+set_input_delay -max 0.8 [get_ports "T"]
+set_input_delay -max 0.8 [get_ports "clk"]
+set_output_delay -max 0.8 [get_ports "Q"]
+
+
+
+4-bit Parallel Adder
+set_input_delay -max 0.8 [get_ports "x"]
+set_input_delay -max 0.8 [get_ports "y"]
+set_input_delay -max 0.8 [get_ports "cin"]
+set_output_delay -max 0.8 [get_ports "sum"]
+set_output_delay -max 0.8 [get_ports "cout"]
+
+
+
+4-bit Synchronous Counter
+set_clock_transition -rise 0.1 [get_ports "clk"]
+set_clock_transition -fall 0.1 [get_ports "clk"]
+set_clock_uncertainty 1.0 [get_ports "clk"]
+
+set_input_delay -max 1.0 [get_ports "reset"]
+set_output_delay -max 1.0 [get_ports "count"]
+
+
+
